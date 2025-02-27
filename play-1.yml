@@ -1,0 +1,6 @@
+---
+- name: Проверка соединения
+  hosts: all
+  tasks:
+    - name: Ping хостов
+      ping:
