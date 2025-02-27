@@ -1,0 +1,68 @@
+---
+- name: Install LAMP Stack
+  hosts: all
+  become: yes
+  vars:
+    student_name: "Мусралинов"
+    variant: "19"
+    mysql_root_password: "secure_password"
+  
+  tasks:
+    - name: Update all packages
+      dnf:
+        name: "*"
+        state: latest
+        update_cache: yes
+    
+    - name: Install Apache
+      dnf:
+        name: httpd
+        state: present
+    
+    - name: Start and enable Apache
+      systemd:
+        name: httpd
+        state: started
+        enabled: yes
+    
+    - name: Install MariaDB
+      dnf:
+        name: 
+          - mariadb
+          - mariadb-server
+        state: present
+    
+    - name: Start and enable MariaDB
+      systemd:
+        name: mariadb
+        state: started
+        enabled: yes
+    
+    - name: Install PHP and required modules
+      dnf:
+        name: 
+          - php
+          - php-mysqlnd
+          - php-json
+          - php-gd
+          - php-mbstring
+          - php-xml
+          - php-zip
+        state: present
+    
+    - name: Restart Apache
+      systemd:
+        name: httpd
+        state: restarted
+    
+    - name: Create info.php file
+      copy:
+        content: |
+          <?php
+          // Created by {{ Самир }}, Variant {{ 10 }}
+          phpinfo();
+          ?>
+        dest: /var/www/html/info.php
+        owner: apache
+        group: apache
+        mode: '0644'
