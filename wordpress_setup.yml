@@ -1,0 +1,124 @@
+---
+- name: Install LAMP and WordPress
+  hosts: all
+  become: yes
+  vars:
+    student_name: "wordpress_db_musralinov"
+    variant: "19"
+    mysql_root_password: "secure_password"
+    wordpress_db_name: "wordpress"
+    wordpress_db_user: "wpuser"
+    wordpress_db_password: "wppassword"
+  
+  tasks:
+    - name: Update all packages
+      dnf:
+        name: "*"
+        state: latest
+        update_cache: yes
+    
+    - name: Install Apache
+      dnf:
+        name: httpd
+        state: present
+    
+    - name: Start and enable Apache
+      systemd:
+        name: httpd
+        state: started
+        enabled: yes
+    
+    - name: Install MariaDB
+      dnf:
+        name: 
+          - mariadb
+          - mariadb-server
+        state: present
+    
+    - name: Start and enable MariaDB
+      systemd:
+        name: mariadb
+        state: started
+        enabled: yes
+    
+    - name: Install PHP and required modules
+      dnf:
+        name: 
+          - php
+          - php-mysqlnd
+          - php-json
+          - php-gd
+          - php-mbstring
+          - php-xml
+          - php-zip
+        state: present
+    - name: Install Python MySQL module
+      dnf:
+        name:
+          - python3-PyMySQL
+        state: present
+
+    - name: Restart Apache
+      systemd:
+        name: httpd
+        state: restarted
+    
+    - name: Create WordPress database
+      mysql_db:
+        name: "{{ wordpress_db_name }}"
+        state: present
+        login_unix_socket: /var/lib/mysql/mysql.sock
+      vars:
+        ansible_python_interpreter: /usr/bin/python3
+        ansible_module_defaults:
+          mysqld_db:
+            connect_params:
+            db_driver: pymsql
+    - name: Create WordPress database user
+      mysql_user:
+        name: "{{ wordpress_db_user }}"
+        password: "{{ wordpress_db_password }}"
+        priv: "{{ wordpress_db_name }}.*:ALL"
+        host: localhost
+        state: present
+        login_unix_socket: /var/lib/mysql/mysql.sock
+      vars:
+        ansible_python_interpreter: /usr/bin/python3
+        ansible_module_defaults:
+          mysql_user:
+            connect_params:
+            db_driver: pymsql
+    - name: Download WordPress
+      get_url:
+        url: https://wordpress.org/latest.tar.gz
+        dest: /tmp/wordpress.tar.gz
+    
+    - name: Create WordPress directory
+      file:
+        path: /var/www/html/wordpress
+        state: directory
+        owner: apache
+        group: apache
+    
+    - name: Extract WordPress
+      unarchive:
+        src: /tmp/wordpress.tar.gz
+        dest: /tmp/
+        remote_src: yes
+    
+    - name: Move WordPress files
+      shell: cp -r /tmp/wordpress/* /var/www/html/wordpress/
+    
+    - name: Set ownership
+      file:
+        path: /var/www/html/wordpress
+        owner: apache
+        group: apache
+        recurse: yes
+    
+    - name: Create wp-config
+      template:
+        src: wp-config.php.j2
+        dest: /var/www/html/wordpress/wp-config.php
+        owner: apache
+        group: apache

@@ -1,0 +1,14 @@
+---
+- name: Установка Apache
+  hosts: all
+  become: yes
+  tasks:
+    - name: Установка httpd
+      dnf:
+        name: httpd
+        state: present
+    - name: Запуск и включение службы httpd
+      service:
+        name: httpd
+        state: started
+        enabled: yes

@@ -1,0 +1,13 @@
+---
+- name: Создание директорий
+  hosts: all
+  tasks:
+    - name: Создание директории ProjectNN
+      file:
+        path: ~/Project19
+        state: directory
+
+    - name: Создание директории AnsibleNN
+      file:
+        path: ~/Ansible19
+        state: directory

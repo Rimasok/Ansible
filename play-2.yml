@@ -1,0 +1,13 @@
+---
+- name: Обновление системы
+  hosts: all
+  become: yes
+  tasks:
+    - name: Обновление индекса пакетов
+      dnf:
+        update_cache: yes
+    
+    - name: Обновление всех пакетов
+      dnf:
+        name: "*"
+        state: latest

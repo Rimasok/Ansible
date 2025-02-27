@@ -1,0 +1,20 @@
+---
+- name: Настройка веб-страницы
+  hosts: all
+  become: yes
+  tasks:
+    - name: Создание персональной страницы
+      copy:
+        content: |
+          <html>
+          <head>
+            <title>Моя страница</title>
+          </head>
+          <body>
+            <h1>Информация о студенте</h1>
+            <p>Фамилия: Мусралинов</p>
+            <p>Имя: Самир</p>
+            <p>Группа: C1-21</p>
+          </body>
+          </html>
+        dest: /var/www/html/index.html

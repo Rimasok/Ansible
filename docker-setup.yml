@@ -1,0 +1,62 @@
+---
+- name: Install Docker
+  hosts: all
+  become: yes
+  vars:
+    student_name: "Мусралинов"
+    variant: "19"
+  
+  tasks:
+    - name: Update all packages
+      dnf:
+        name: "*"
+        state: latest
+        update_cache: yes
+    
+    - name: Install required packages
+      dnf:
+        name:
+          - yum-utils
+          - device-mapper-persistent-data
+          - lvm2
+        state: present
+    
+    - name: Add Docker repository
+      command: dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+    
+    - name: Install Docker CE
+      dnf:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+        state: present
+    
+    - name: Start and enable Docker
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+    
+    - name: Install python3-docker for Ansible Docker modules
+      dnf:
+        name: python3-docker
+        state: present
+    
+    - name: Create Docker test script
+      copy:
+        content: |
+          #!/bin/bash
+          docker run --rm hello-world
+        dest: /root/test-docker.sh
+        owner: root
+        group: root
+        mode: '0755'
+    
+    - name: Run test container
+      command: /root/test-docker.sh
+      register: docker_test
+    
+    - name: Show test result
+      debug:
+        var: docker_test.stdout_line

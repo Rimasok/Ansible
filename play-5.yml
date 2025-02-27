@@ -1,0 +1,37 @@
+---
+- name: Проверка и копирование файлов
+  hosts: all
+  tasks:
+    - name: Проверить, существует ли project.txt
+      stat:
+        path: ~/project.txt
+      register: project_file
+
+    - name: Создать project.txt, если его нет
+      copy:
+        content: "Файл создан автоматически"
+        dest: ~/project.txt
+      when: not project_file.stat.exists
+
+    - name: Скопировать project.txt, если он существует
+      copy:
+        src: ~/project.txt
+        dest: ~/Project19/project.txt
+        remote_src: yes
+
+    - name: Проверить, существует ли ansible.txt
+      stat:
+        path: ~/ansible.txt
+      register: ansible_file
+
+    - name: Создать ansible.txt, если его нет
+      copy:
+        content: "Файл создан автоматически"
+        dest: ~/ansible.txt
+      when: not ansible_file.stat.exists
+
+    - name: Скопировать ansible.txt, если он существует
+      copy:
+        src: ~/ansible.txt
+        dest: ~/Ansible19/ansible.txt
+        remote_src: yes

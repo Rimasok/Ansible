@@ -1,0 +1,12 @@
+---
+- name: Сбор информации о системе
+  hosts: all
+  tasks:
+    - name: Получение информации о системе
+      setup:
+      register: system_facts
+
+    - name: Сохранение информации в файл
+      copy:
+        content: "{{ system_facts | to_nice_yaml }}"
+        dest: "~/ansible-facts-19"
